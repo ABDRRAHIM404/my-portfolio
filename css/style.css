@@ -566,41 +566,125 @@ img{height:auto}
 .header-progress{position:fixed;inset:0 0 auto 0;bottom:auto;height:3px;width:100%;z-index:95;transform:scaleX(var(--header-progress,0));pointer-events:none}
 
 
-/* Mobile curtain fixes */
-@media (max-width: 640px) {
-  .opening-curtain { overflow: hidden; }
-  .curtain-wing { width: 50%; overflow: hidden; }
-  .curtain-wing::after { inset: 16px; }
-  .curtain-line { top: 13%; height: 74%; }
-  .curtain-mark { bottom: 22px; font-size: 10px; letter-spacing: .16em; }
-  .wing-name {
-    top: 56%;
-    font-size: clamp(.92rem, 4.7vw, 1.3rem);
-    line-height: 1.08;
-    max-width: calc(50vw - 22px);
-    text-shadow: 0 4px 22px #070514, 0 0 18px #9865ff44;
+/* MOBILE CURTAIN: two true half-viewport panels, aligned to the page. */
+@media screen and (max-width: 640px) {
+  html, body { max-width: 100%; overflow-x: clip; }
+  html.curtain-locked { overflow: hidden; scrollbar-gutter: auto; }
+  .opening-curtain {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: auto;
+    left: 0;
+    width: 100%;
+    width: 100dvw;
+    height: 100%;
+    height: 100dvh;
+    max-width: 100%;
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: stretch;
+    justify-content: flex-start;
+    overflow: hidden;
+    transform: none;
+    perspective: none;
+    contain: none;
+    touch-action: none;
+    overscroll-behavior: contain;
+    isolation: isolate;
   }
-  .wing-name-left { right: 14px; text-align: right; }
-  .wing-name-right { left: 14px; text-align: left; }
-  .wing-name .curtain-name-group { max-width: 100%; }
-  .curtain-edge-glow {
-    width: 4px;
-    box-shadow: 0 0 8px 3px #c99cff, 0 0 22px 9px #a673ffb6, 0 0 48px 18px #8e50ef66;
+  .opening-curtain .curtain-wing {
+    position: relative;
+    inset: auto;
+    flex: 0 0 50%;
+    width: 50%;
+    min-width: 0;
+    max-width: 50%;
+    height: 100%;
+    overflow: visible;
+    margin: 0;
+    padding: 0;
+    transform-origin: center center;
+    box-sizing: border-box;
   }
-  .curtain-center .curtain-overline {
-    top: calc(46% - 62px);
-    padding: 0 18px;
-    font-size: 8px;
-    letter-spacing: .22em;
+  .opening-curtain .wing-left { left: auto; right: auto; border-right: 1px solid #9a71e3; }
+  .opening-curtain .wing-right { left: auto; right: auto; border-left: 1px solid #9a71e3; }
+  .curtain-wing::after { inset: 14px; }
+  .curtain-line { top: 9%; height: 82%; }
+  .curtain-mark { bottom: 24px; font-size: 10px; letter-spacing: .15em; }
+  .wing-left .curtain-mark { left: 17px; }
+  .wing-right .curtain-mark { right: 17px; }
+  /* Each name fits inside its own panel and meets at the center seam. */
+  .opening-curtain .wing-name {
+    position: absolute;
+    top: 50%;
+    width: 100%;
+    max-width: 100%;
+    display: flex;
+    align-items: baseline;
+    font-size: clamp(13px, 3.9vw, 18px);
+    line-height: 1.16;
+    letter-spacing: -.055em;
+    white-space: nowrap;
+    transform: translateY(-50%);
+    text-shadow: 0 4px 24px #060414, 0 0 15px #9875fa6a;
+    pointer-events: none;
   }
-  .curtain-center p {
-    top: calc(46% + 48px);
+  .opening-curtain .wing-name-left {
+    left: 0;
+    right: auto;
+    padding: 0 9px 0 3px;
+    justify-content: flex-end;
+  }
+  .opening-curtain .wing-name-right {
+    right: 0;
+    left: auto;
+    padding: 0 3px 0 9px;
+    justify-content: flex-start;
+  }
+  .opening-curtain .wing-name .curtain-name-group {
+    display: inline-flex;
+    max-width: 100%;
+    overflow: visible;
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+  .opening-curtain .curtain-edge-glow { width: 4px; }
+  .opening-curtain .wing-left .curtain-edge-glow { right: -2px; }
+  .opening-curtain .wing-right .curtain-edge-glow { left: -2px; }
+  /* These are centered relative to the entire viewport, not either panel. */
+  .opening-curtain .curtain-center {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    transform: none;
+    text-align: center;
+    pointer-events: none;
+  }
+  .opening-curtain .curtain-center .curtain-overline {
+    top: calc(50% - 82px);
+    width: 100%;
     padding: 0 18px;
     font-size: 9px;
-    letter-spacing: .22em;
+    letter-spacing: .16em;
+    white-space: normal;
   }
-  .curtain-center .curtain-mouse {
-    top: calc(46% + 70px);
-    transform: translateX(-50%) scale(.86);
+  .opening-curtain .curtain-center p {
+    top: calc(50% + 52px);
+    width: 100%;
+    padding: 0 12px;
+    font-size: 9px;
+    letter-spacing: .17em;
   }
+  .opening-curtain .curtain-center .curtain-mouse {
+    top: calc(50% + 76px);
+    left: 50%;
+    margin: 0;
+    transform: translateX(-50%);
+  }
+  .opening-curtain .curtain-progress-track { left: 0; width: 100%; }
+}
+@media screen and (max-width: 350px) {
+  .opening-curtain .wing-name { font-size: 12px; }
 }
