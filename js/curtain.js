@@ -103,7 +103,7 @@
     if (touchY === null || reduce.matches) return;
     const y = e.touches[0]?.clientY;
     if (y == null) return;
-    const delta = (touchY - y) * 2;
+    const delta = (touchY - y) * 3.4;
     touchY = y;
     if (opened && window.scrollY <= 1 && delta < 0) { target = 1; displayed = 1; lock(); }
     if (!opened) { e.preventDefault(); step(delta); }
