@@ -111,4 +111,8 @@ The AB initials expand into the full name before the doors begin moving. A scrol
 
 ## Header and Back to Top
 The navigation header scrolls away with the page. The 3px reading-progress line stays fixed at the top of the viewport. Footer Back to Top uses a 3000ms scroll, then closes the curtain.
-# my-portfolio
+
+
+## Mobile curtain fix
+
+This version slows the curtain reveal on phones, gives the full name more time to finish before the panels move, reduces touch sensitivity, and adjusts the mobile-only curtain typography and positioning so the intro fits better on narrow screens.

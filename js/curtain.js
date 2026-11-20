@@ -28,19 +28,22 @@
   let opened = false;
   let touchY = null;
   let returning = false;
-  const travel = () => Math.max(1000, window.innerHeight * 1.65);
+  const isMobile = () => window.matchMedia('(max-width: 640px)').matches;
+  const travel = () => Math.max(isMobile() ? 1350 : 1000, window.innerHeight * (isMobile() ? 2.55 : 1.65));
   const clamp = n => Math.min(1, Math.max(0, n));
 
   function paint(progress) {
     // Ease the panels: no movement or scaling of the actual website.
     // Three distinct phases: reveal initials -> hold full name -> open doors.
     // Keeping the name fully expanded before movement avoids chopped-up words.
-    const opening = clamp((progress - 0.57) / 0.43);
+    const openingStart = isMobile() ? 0.68 : 0.57;
+    const opening = clamp((progress - openingStart) / (1 - openingStart));
     const eased = opening * opening * (3 - 2 * opening);
     left.style.transform = `translate3d(${-105 * eased}%,0,0)`;
     right.style.transform = `translate3d(${105 * eased}%,0,0)`;
     // Unfold each initial into its full name during the first half of the opening.
-    const nameProgress = clamp((progress - 0.045) / 0.24);
+    const nameStart = isMobile() ? 0.065 : 0.045;
+    const nameProgress = clamp((progress - nameStart) / (isMobile() ? 0.28 : 0.24));
     const nameEase = 1 - Math.pow(1 - nameProgress, 3);
     suffixes.forEach((el, i) => {
       el.style.width = `${suffixWidths[i] * nameEase}px`;
@@ -50,7 +53,7 @@
     const nameOpacity = clamp((1 - opening) / 0.28);
     wingNames.forEach(el => { el.style.opacity = String(nameOpacity); });
     // Hide centered helper text BEFORE the doors open, preventing overlap with the website.
-    center.style.opacity = String(1 - clamp((progress - 0.33) / 0.20));
+    center.style.opacity = String(1 - clamp((progress - (isMobile() ? 0.44 : 0.33)) / (isMobile() ? 0.18 : 0.20)));
     // Each bright edge travels with its wing and fades near the end.
     curtain.style.setProperty('--edge-opacity', String(1 - clamp((opening - 0.82) / 0.18)));
     bar.style.transform = `scaleX(${progress})`;
@@ -101,7 +104,7 @@
     if (touchY === null || reduce.matches) return;
     const y = e.touches[0]?.clientY;
     if (y == null) return;
-    const delta = (touchY - y) * 1.4;
+    const delta = (touchY - y) * (isMobile() ? 0.82 : 1.4);
     touchY = y;
     if (opened && window.scrollY <= 1 && delta < 0) { target = 1; displayed = 1; lock(); }
     if (!opened) { e.preventDefault(); step(delta); }

@@ -564,3 +564,43 @@ img{height:auto}
 /* Header scrolls with the page; only the thin reading progress stays fixed. */
 .site-header.header-polished{position:relative;top:auto}
 .header-progress{position:fixed;inset:0 0 auto 0;bottom:auto;height:3px;width:100%;z-index:95;transform:scaleX(var(--header-progress,0));pointer-events:none}
+
+
+/* Mobile curtain fixes */
+@media (max-width: 640px) {
+  .opening-curtain { overflow: hidden; }
+  .curtain-wing { width: 50%; overflow: hidden; }
+  .curtain-wing::after { inset: 16px; }
+  .curtain-line { top: 13%; height: 74%; }
+  .curtain-mark { bottom: 22px; font-size: 10px; letter-spacing: .16em; }
+  .wing-name {
+    top: 56%;
+    font-size: clamp(.92rem, 4.7vw, 1.3rem);
+    line-height: 1.08;
+    max-width: calc(50vw - 22px);
+    text-shadow: 0 4px 22px #070514, 0 0 18px #9865ff44;
+  }
+  .wing-name-left { right: 14px; text-align: right; }
+  .wing-name-right { left: 14px; text-align: left; }
+  .wing-name .curtain-name-group { max-width: 100%; }
+  .curtain-edge-glow {
+    width: 4px;
+    box-shadow: 0 0 8px 3px #c99cff, 0 0 22px 9px #a673ffb6, 0 0 48px 18px #8e50ef66;
+  }
+  .curtain-center .curtain-overline {
+    top: calc(46% - 62px);
+    padding: 0 18px;
+    font-size: 8px;
+    letter-spacing: .22em;
+  }
+  .curtain-center p {
+    top: calc(46% + 48px);
+    padding: 0 18px;
+    font-size: 9px;
+    letter-spacing: .22em;
+  }
+  .curtain-center .curtain-mouse {
+    top: calc(46% + 70px);
+    transform: translateX(-50%) scale(.86);
+  }
+}
