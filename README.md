@@ -115,3 +115,8 @@ The navigation header scrolls away with the page. The 3px reading-progress line 
 
 ## Mobile curtain layout correction
 This version fixes the phone-width alignment instead of adjusting animation speed. Mobile curtains use two exact 50%-width panels inside a fixed full-viewport stage, and the labels are centered to the viewport. The desktop curtain and 3000ms Back-to-Top duration are untouched. CSS and curtain script URLs are cache-busted for GitHub Pages.
+
+
+## Mobile Back to Top correction
+
+The footer now scrolls to the actual top in 3000ms and keeps the document pinned there during the curtain's reverse animation. The mobile curtain cover is sized to the layout viewport (rather than the temporarily shortened visual viewport when mobile browser chrome changes). Mobile swipe sensitivity is 3.4, as requested.

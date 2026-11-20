@@ -688,3 +688,24 @@ img{height:auto}
 @media screen and (max-width: 350px) {
   .opening-curtain .wing-name { font-size: 12px; }
 }
+
+
+/* Back-to-top mobile viewport guard. A dynamic browser toolbar must never crop the curtain. */
+@media screen and (max-width: 640px) {
+  .opening-curtain {
+    position: fixed;
+    inset: 0 0 auto 0;
+    top: 0;
+    bottom: auto;
+    height: var(--mobile-curtain-height, 100vh);
+    min-height: 100vh;
+    min-height: 100lvh;
+    width: 100%;
+    max-width: 100%;
+    transform: none;
+  }
+  .opening-curtain .curtain-wing {
+    height: 100%;
+    min-height: 100%;
+  }
+}

@@ -30,6 +30,17 @@
   let touchY = null;
   let returning = false;
   const travel = () => Math.max(1000, window.innerHeight * 1.65);
+  const site = document.getElementById('portfolioSite');
+  // Dynamic browser chrome can change 100dvh while a return animation runs.
+  // Pin the cover to the *largest* layout viewport height rather than a transient visual viewport.
+  function syncCurtainViewport() {
+    if (!mobileScreen.matches) { curtain.style.removeProperty('--mobile-curtain-height'); return; }
+    const vp = Math.max(document.documentElement.clientHeight, window.innerHeight, window.visualViewport?.height || 0);
+    curtain.style.setProperty('--mobile-curtain-height', `${Math.ceil(vp)}px`);
+  }
+  syncCurtainViewport();
+  window.visualViewport?.addEventListener('resize', syncCurtainViewport);
+  window.addEventListener('orientationchange', syncCurtainViewport);
   const clamp = n => Math.min(1, Math.max(0, n));
 
   function paint(progress) {
@@ -57,6 +68,7 @@
     bar.style.transform = `scaleX(${progress})`;
   }
   function lock() {
+    syncCurtainViewport();
     if (mobileScreen.matches && window.scrollX !== 0) window.scrollTo(0, window.scrollY);
     root.classList.add('curtain-locked');
     curtain.style.visibility = 'visible';
@@ -103,7 +115,7 @@
     if (touchY === null || reduce.matches) return;
     const y = e.touches[0]?.clientY;
     if (y == null) return;
-    const delta = (touchY - y) * 3.4;
+    const delta = (touchY - y) * (mobileScreen.matches ? 3.4 : 1.4);
     touchY = y;
     if (opened && window.scrollY <= 1 && delta < 0) { target = 1; displayed = 1; lock(); }
     if (!opened) { e.preventDefault(); step(delta); }
@@ -130,46 +142,89 @@
   // Footer return: scroll the document upward smoothly, THEN reverse the existing curtain.
   // Keep the page still while the panels close so there is no layout jump.
   const returnLink=document.querySelector('[data-scroll-curtain="true"]');
-  if(returnLink) returnLink.addEventListener('click', event=>{
+  if (returnLink) returnLink.addEventListener('click', event => {
     event.preventDefault();
-    if(returning) return;
-    if(reduce.matches){window.scrollTo({top:0,behavior:'instant'});return;}
-    returning=true;
-    // Force deterministic per-frame scrolling even when the page uses smooth CSS scrolling.
-    const previousScrollBehavior=root.style.scrollBehavior;
-    root.style.scrollBehavior='auto';
-    const fromY=window.scrollY;
-    const scrollDuration=fromY>1?3000:0;
-    const ease=x=> x<.5?4*x*x*x:1-Math.pow(-2*x+2,3)/2;
-    const afterScroll=()=>{
-      window.scrollTo(0,0);
-      root.style.scrollBehavior=previousScrollBehavior;
-      // Lock only at page top. The page never moves during closing.
-      target=displayed=1;
+    if (returning) return;
+
+    const jumpToTop = () => {
+      window.scrollTo(0, 0);
+      document.scrollingElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    };
+
+    if (reduce.matches) {
+      jumpToTop();
+      target = displayed = 0;
+      paint(0);
+      return;
+    }
+
+    returning = true;
+    // Do NOT restore smooth scrolling before the curtain finishes closing.
+    // That was allowing the browser to resume a smooth scroll beneath the overlay.
+    const previous = {
+      rootValue: root.style.getPropertyValue('scroll-behavior'),
+      rootPriority: root.style.getPropertyPriority('scroll-behavior'),
+      bodyValue: document.body.style.getPropertyValue('scroll-behavior'),
+      bodyPriority: document.body.style.getPropertyPriority('scroll-behavior')
+    };
+    root.style.setProperty('scroll-behavior', 'auto', 'important');
+    document.body.style.setProperty('scroll-behavior', 'auto', 'important');
+
+    const restoreBehavior = () => {
+      if (previous.rootValue) root.style.setProperty('scroll-behavior', previous.rootValue, previous.rootPriority);
+      else root.style.removeProperty('scroll-behavior');
+      if (previous.bodyValue) document.body.style.setProperty('scroll-behavior', previous.bodyValue, previous.bodyPriority);
+      else document.body.style.removeProperty('scroll-behavior');
+      returning = false;
+    };
+    const ease = x => x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+    const fromY = Math.max(window.scrollY, document.scrollingElement.scrollTop, document.body.scrollTop);
+    const scrollDuration = fromY > 1 ? 3000 : 0;
+    const closeDuration = 2350;
+
+    // Wait for the page to actually reach Y=0. On mobile, switching overflow
+    // and browser toolbar resizing can otherwise leave the hero halfway scrolled.
+    function finishScroll(attempt = 0) {
+      jumpToTop();
+      if (Math.abs(window.scrollY) > 1 && attempt < 12) {
+        requestAnimationFrame(() => finishScroll(attempt + 1));
+        return;
+      }
+      syncCurtainViewport();
+      target = displayed = 1;
       paint(1);
       lock();
-      let started=null;
-      const closeDuration=2350;
-      function closeFrame(now){
-        if(!returning)return;
-        if(started===null)started=now;
-        const p=clamp((now-started)/closeDuration);
-        target=displayed=1-ease(p);
+      jumpToTop();
+
+      let closeStart = null;
+      function closeFrame(now) {
+        if (closeStart === null) closeStart = now;
+        const p = clamp((now - closeStart) / closeDuration);
+        target = displayed = 1 - ease(p);
+        // Keep the document at the real top while the doors close.
+        if (window.scrollY > 0 || document.scrollingElement.scrollTop > 0) jumpToTop();
         paint(displayed);
-        if(p<1) requestAnimationFrame(closeFrame);
-        else { target=displayed=0;paint(0);returning=false; }
+        if (p < 1) requestAnimationFrame(closeFrame);
+        else {
+          target = displayed = 0;
+          paint(0);
+          jumpToTop();
+          restoreBehavior();
+        }
       }
       requestAnimationFrame(closeFrame);
-    };
-    if(!scrollDuration){afterScroll();return;}
-    let start=null;
-    function scrollFrame(now){
-      if(!returning)return;
-      if(start===null)start=now;
-      const p=clamp((now-start)/scrollDuration);
-      window.scrollTo(0,Math.round(fromY*(1-ease(p))));
-      if(p<1)requestAnimationFrame(scrollFrame);
-      else afterScroll();
+    }
+
+    if (!scrollDuration) { finishScroll(); return; }
+    let scrollStart = null;
+    function scrollFrame(now) {
+      if (scrollStart === null) scrollStart = now;
+      const p = clamp((now - scrollStart) / scrollDuration);
+      const nextY = Math.round(fromY * (1 - ease(p)));
+      window.scrollTo(0, nextY);
+      if (p < 1) requestAnimationFrame(scrollFrame);
+      else finishScroll();
     }
     requestAnimationFrame(scrollFrame);
   });
