@@ -709,3 +709,22 @@ img{height:auto}
     min-height: 100%;
   }
 }
+
+
+/* Responsive layout-width fix: clip atmospheric glows without enlarging the mobile layout viewport.
+   The original right:-260px decorative glow was making visualViewport wider
+   than the document's 393px content on Android browsers. */
+.ambient-field {
+  position: absolute;
+  inset: 0 0 auto;
+  width: 100%;
+  height: 1100px;
+  overflow: clip;
+  pointer-events: none;
+  z-index: 0;
+}
+.ambient-field .ambient { position: absolute; }
+@media (max-width: 640px) {
+  html, body { width: 100%; max-width: 100%; }
+  #portfolioSite { width: 100%; min-width: 0; }
+}

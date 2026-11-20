@@ -120,3 +120,9 @@ This version fixes the phone-width alignment instead of adjusting animation spee
 ## Mobile Back to Top correction
 
 The footer now scrolls to the actual top in 3000ms and keeps the document pinned there during the curtain's reverse animation. The mobile curtain cover is sized to the layout viewport (rather than the temporarily shortened visual viewport when mobile browser chrome changes). Mobile swipe sensitivity is 3.4, as requested.
+
+## Mobile viewport-width correction (November 20, 2026)
+
+A decorative ambient glow with `right: -260px` extended the document's visual width by 260 pixels on Android browsers. As a result, the page content appeared squeezed into the left side of the phone with blank space on the right. The glow is now inside an overflow-clipped, full-width `.ambient-field` container. The visual remains, but it can no longer enlarge the layout viewport.
+
+Checked on simulated mobile viewports 320, 393, and 412 CSS pixels: no horizontal document overflow; the curtain and page span the same width; Back to Top returns to Y=0 and closes the full-width curtain. The previous 3-second return and mobile touch sensitivity 3.4 are unchanged.
